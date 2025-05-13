@@ -716,6 +716,8 @@ class BlueprintCanvas(CanvasBase):
 
         x_positions = [p.scenePos().x() for p in ls]
         y_positions = [p.scenePos().y() for p in ls]
+        horizonlength = [p.geometry().width()  for p in ls] #ACHHX
+        verticalheight= [p.geometry().height() for p in ls] #ACHHX
 
         if direction == Direction.Left:
             if len(x_positions) == 0:
@@ -729,10 +731,11 @@ class BlueprintCanvas(CanvasBase):
         if direction == Direction.Right:
             if len(x_positions) == 0:
                 return
-            x = max(x_positions)
+            x = max(x_positions+horizonlength) #ACHHX
             for n in ls:
                 p = n.scenePos()
-                p.setX(x)
+                w=n.geometry().width() #ACHHX
+                p.setX(x-w)            #ACHHX
                 n.setPos(p)
 
         if direction == Direction.Up:
@@ -747,10 +750,11 @@ class BlueprintCanvas(CanvasBase):
         if direction == Direction.Down:
             if len(y_positions) == 0:
                 return
-            y = max(y_positions)
+            y = max(y_positions+verticalheight) #ACHHX
             for n in ls:
                 p = n.scenePos()
-                p.setY(y)
+                h = n.geometry().height() #ACHHX
+                p.setY(y-h)               #ACHHX
                 n.setPos(p)
         EditorHistory().saveState("Align nodes", modify=True)
 
