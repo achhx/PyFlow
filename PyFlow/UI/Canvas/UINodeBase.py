@@ -36,6 +36,12 @@ from PyFlow.UI.Utils.stylesheet import Colors
 
 from collections import OrderedDict
 
+#ACHHX --------
+from inspect import getfile, getsourcefile, getsourcelines
+from PyFlow  import GET_PACKAGES, GET_PACKAGE_CHECKED
+import subprocess
+#ACHHX ++++++++
+
 UI_NODES_FACTORIES = {}
 
 
@@ -443,7 +449,27 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
         )
         self.actionCopyPath = self._menu.addAction("Copy path")
         self.actionCopyPath.triggered.connect(self.onCopyPathToClipboard)
+        self.actionEditSourceFile = self._menu.addAction("Edit node Logic") #ACHHX  Added to enable edit source file by right click;
+        self.actionEditSourceFile.triggered.connect(self.editSourceFile)     #ACHHX  Added to enable edit source file by right click;
         self._rawNode.computed.connect(self.onComputed)
+
+#ACHHX  Added to enable edit source file by right click;-----Bellow
+    def editSourceFile(self):
+        MYpackage = GET_PACKAGE_CHECKED(self.packageName)
+        MYfunc = None
+        if self._rawNode.lib is not None:
+            MYLibrary = (MYpackage.GetFunctionLibraries()[self._rawNode.lib].getFunctions())
+            MYfunc   = MYLibrary.get(self._rawNode.__class__.__name__) 
+        else:
+            MYLibrary = MYpackage.GetNodeClasses()
+            MYfunc   = MYLibrary.get(self._rawNode.__class__.__name__).__init__
+        MYsource = getsourcefile(MYfunc)
+        MYline   = getsourcelines(MYfunc)
+        MYexe="C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
+        MYarg=" \""+str(MYsource)+"\" -n"+str(MYline[1])
+        MYfinal=MYexe+MYarg
+        subprocess.Popen(MYfinal)
+#ACHHX  Added to enable edit source file by right click;-----Above
 
     def onRefresh(self):
         self._rawNode.processNode()
