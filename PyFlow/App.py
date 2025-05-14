@@ -425,7 +425,7 @@ class PyFlow(QMainWindow):
             tempFileName = self.currentFileName.replace(".pygraph", "") + f"-tempfile-{current_time}.pygraph"
 
             # Open the temp file in 'w+' mode and the target file in 'w' mode
-            with open(tempFileName, "w+") as tempPtr, open(self.currentFileName, "r+") as filePtr:
+            with open(tempFileName, "w+") as tempPtr, open(self.currentFileName, "w") as filePtr:    #ACHHX   Change currentFileName open type from r+ to w to fix save and export error;
                 try:
                     saveData = self.graphManager.get().serialize()
                     json.dump(saveData, tempPtr, indent=4)
