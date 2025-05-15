@@ -651,6 +651,7 @@ class PyFlow(QMainWindow):
                 if os.path.exists(rawPath):
                     extraPackagePaths.append(os.path.normpath(rawPath))
         INITIALIZE(additionalPackageLocations=extraPackagePaths, software="standalone")        
+        self.findChild(QWidget,"NodeBoxToolContent").treeWidget.refresh()
 
     @staticmethod
     def instance(parent=None, software=""):
