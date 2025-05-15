@@ -473,6 +473,11 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
             MYexe=QFileDialog.getOpenFileName(None,"Select notepad++ editor","./","All Files (*)")[0]
         MYfinal= MYexe+MYarg
         MYedit = subprocess.Popen(MYfinal)
+        #os.system("code -r -g      \""+MYsource+"\":"  +str(MYline[1]))
+        #os.system("code            \""+MYsource+"\":"  +str(MYline[1])+" -r -g")
+        #os.system("vim             \""+MYsource+"\"+"  +str(MYline[1])+" &")
+        #os.system("notepad++.lnk   \""+MYsource+"\" -n"+str(MYline[1]))
+        #os.system(r'"'+'"'+MYexe+'" "'+MYsource+'"  -n'+str(MYline[1])+'"')  # notepad执行路径打开
 #ACHHX  Added to enable edit source file by right click;-----Above
 
     def onRefresh(self):
