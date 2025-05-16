@@ -232,6 +232,8 @@ class PyFlow(QMainWindow):
         pluginsMenu = self.menuBar.addMenu("Plugins")
         packagePlugin = pluginsMenu.addAction("Create package...")
         packagePlugin.triggered.connect(PackageWizard.run)
+        packagePlugin = pluginsMenu.addAction("Remove package...")  #ACHHX remove package
+        packagePlugin.triggered.connect(self.removePackage)         #ACHHX remove package
 
         helpMenu = self.menuBar.addMenu("Help")
         helpMenu.addAction("Homepage").triggered.connect(
@@ -244,7 +246,10 @@ class PyFlow(QMainWindow):
                 url
             )
         )
-
+#ACHHX remove package-----Bellow TODO 
+    def removePackage(self):
+        print("ACHHX TODO: remove packages")
+#ACHHX remove package-----Above
     def showPreferencesWindow(self):
         self.preferencesWindow.show()
 
