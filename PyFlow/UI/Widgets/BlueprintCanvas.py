@@ -718,6 +718,8 @@ class BlueprintCanvas(CanvasBase):
         y_positions = [p.scenePos().y() for p in ls]
         horizonlength = [p.geometry().width()  for p in ls] #ACHHX
         verticalheight= [p.geometry().height() for p in ls] #ACHHX
+        x_positionsR=[x + w for x, w in zip(x_positions, horizonlength)]#ACHHX
+        y_positionsD=[x + w for x, w in zip(y_positions, verticalheight)]#ACHHX
 
         if direction == Direction.Left:
             if len(x_positions) == 0:
@@ -731,7 +733,7 @@ class BlueprintCanvas(CanvasBase):
         if direction == Direction.Right:
             if len(x_positions) == 0:
                 return
-            x = max(x_positions+horizonlength) #ACHHX
+            x = max(x_positionsR) #ACHHX
             for n in ls:
                 p = n.scenePos()
                 w=n.geometry().width() #ACHHX
@@ -750,7 +752,7 @@ class BlueprintCanvas(CanvasBase):
         if direction == Direction.Down:
             if len(y_positions) == 0:
                 return
-            y = max(y_positions+verticalheight) #ACHHX
+            y = max(y_positionsD) #ACHHX
             for n in ls:
                 p = n.scenePos()
                 h = n.geometry().height() #ACHHX
