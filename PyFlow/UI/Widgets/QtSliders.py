@@ -23,8 +23,8 @@ from PyFlow.Core.Common import *
 from PyFlow.Core import structs
 
 
-FLOAT_SLIDER_DRAG_STEPS = (100.0, 10.0, 1.0, 0.1, 0.01, 0.001)
-INT_SLIDER_DRAG_STEPS = (100.0, 10.0, 1.0)
+FLOAT_SLIDER_DRAG_STEPS = (1.0E4, 1.0E3, 100.0, 10.0, 1.0, 0.1, 0.01, 0.001, 1.0E-3, 1.0E-4)  #ACHHX extend dragger range
+INT_SLIDER_DRAG_STEPS = (10000, 1000, 100, 10, 1)                                             #ACHHX extend dragger range
 
 
 class inputDragger(QtWidgets.QWidget):
@@ -396,7 +396,28 @@ class DoubleSlider(slider):
         self.doubleValueChanged.emit(mappedValue)
 
 
-class valueBox(QtWidgets.QDoubleSpinBox):
+#ACHHX  bellow added to support scientific notation of float data
+# 在文件顶部添加
+class SciDoubleSpinBox(QtWidgets.QDoubleSpinBox):
+    def validate(self, text, pos):
+        try:
+            float(text)
+            return (QtGui.QValidator.Acceptable, text, pos)
+        except ValueError:
+            return (QtGui.QValidator.Intermediate, text, pos)
+
+    def valueFromText(self, text):
+        try:
+            return float(text)
+        except ValueError:
+            return 0.0
+
+    def textFromValue(self, value):
+        return "{:g}".format(value)
+#ACHHX  above added to support scientific notation of float data
+
+
+class valueBox(SciDoubleSpinBox): #ACHHX  change QtWidgets.QDoubleSpinBox to  SciDoubleSpinBox to support scientific notation of float data
     """Custom QDoubleSpinBox
 
     Custom SpinBox with Houdini Style draggers, :obj:`draggers`. Middle Click to display a bunch of draggers to change value by adding different delta values
@@ -412,7 +433,7 @@ class valueBox(QtWidgets.QDoubleSpinBox):
         labelText="",
         type="float",
         buttons=False,
-        decimals=3,
+        decimals=18,   #ACHHX change from 3 to 18 to support Double
         draggerSteps=FLOAT_SLIDER_DRAG_STEPS,
         *args,
         **kwargs,
@@ -469,6 +490,11 @@ class valueBox(QtWidgets.QDoubleSpinBox):
         val = self.value() + step
         self.setValue(val)
 
+    def onValueDecremented(self, step):  #ACHHX TODO added to handle decrease, but not used yet
+        self.valueIncremented.emit(step)
+        val = self.value() - step
+        self.setValue(val)
+
     def eventFilter(self, object, event):
         if event.type() == QtCore.QEvent.MouseButtonPress:
             if event.button() == QtCore.Qt.MiddleButton:
@@ -477,6 +503,7 @@ class valueBox(QtWidgets.QDoubleSpinBox):
                         self, self.isFloat, draggerSteps=self.draggerSteps
                     )
                     self.draggers.increment.connect(self.onValueIncremented)
+                    self.draggers.decrement.connect(self.onValueDecremented) #ACHHX TODO added to handle decrease, but not used yet
                 self.draggers.show()
                 if self.isFloat:
                     self.draggers.move(
@@ -487,6 +514,17 @@ class valueBox(QtWidgets.QDoubleSpinBox):
                             )
                         )
                     )
+                    if self.draggers.activeDrag is not None:              #ACHHX Enable to set the dragger step using middlebutton hold & move
+                        new_step=float(self.draggers.activeDrag._factor)  #ACHHX TODO PROBLEM: The set value delays to next step?
+                        self.setSingleStep(new_step)  # Ensure float type #ACHHX TODO PROBLEM: int not supported yet
+                        self.lineEdit().step=new_step
+                        self.lineEdit().update()
+                        self.update()
+                        #self.draggers.repaint()
+                        #self.draggers.setFocus()
+                        #self.repaint()
+                    else:
+                        print("self.draggers.activeDrag is None")
                 else:
                     self.draggers.move(
                         self.mapToGlobal(
