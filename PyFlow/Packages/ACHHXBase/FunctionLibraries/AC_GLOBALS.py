@@ -1,12 +1,8 @@
-from PyFlow.Core.Common import *
-from PyFlow.Core import FunctionLibraryBase
-from PyFlow.Core import IMPLEMENT_NODE
 import numpy as np
 import ctypes
-import ast
-from typing import List
-from typing import TypedDict
-
+from typing import List, TypedDict
+#from collections import namedtuple
+#from typing import Tuple,List,Dict
 
 def ACGetTypeByString(gettype=(str,"int")):
     tempType=ctypes.c_int
@@ -50,8 +46,16 @@ def ACGetStringByType(gettype=(ctypes,ctypes.c_int)):
     else:
         raise ValueError("Unsupported data type")
 
-class ACDataPackPinStruct(TypedDict):
-    """doc string for ACDataPackPinStruct"""
+
+
+
+#定义ACDataPackPinStruct，用于PyFlow对ACDataPack做引脚集成
+#str     DBname用于在ACDATA_DB中进行查找
+#str     DBtype用于记录数组的元素类型
+#intList DBshape用于记录数组的形状
+#bool    DBstate用于记录数组的状态
+class AC_ArrayPinStruct(TypedDict):
+    """doc string for AC_ArrayPinStruct"""
     NDname: str
     NDtype: str
     NDshape: List[int]
@@ -66,12 +70,14 @@ class ACDataPackPinStruct(TypedDict):
         self.NDshape            = NDshape
         self.NDstate            = NDstate
     
-    def getEmptyACDPPS():
-        tmpEmpty:ACDataPackPinStruct={"NDname": "ACDP_EMPTY",
+    def getEmpty():
+        tmpEmpty:AC_ArrayPinStruct={"NDname": "ACDP_EMPTY",
                                       "NDtype": "double",
                                       "NDshape": [0],
                                       "NDstate": False}
         return tmpEmpty
+
+
 
 
 #定义ACDataPack类，用于存储每个数组的元素
@@ -79,7 +85,7 @@ class ACDataPackPinStruct(TypedDict):
 #ctypes  DBtype用于记录数组的元素类型
 #intList DBshape用于记录数组的形状
 #bool    DBstate用于记录数组的状态
-class ACDataPack:
+class AC_Array:
     def __init__(self,  ndname ="ACDP_EMPTY",
                         ndtype =ctypes.c_double,
                         ndshape=[0],
@@ -193,14 +199,17 @@ class ACDataPack:
         self.__DParray = np.empty([0])
 
     def __str__(self):
-        return f"ACDataPack(name={self.__DPname}, type={self.__DPtype}, shape={self.__DPshape}, state={self.__DPstate})"
+        return f"AC_Array(name={self.__DPname}, type={self.__DPtype}, shape={self.__DPshape}, state={self.__DPstate})"
+
+
+
 
 #定义ACDATA全局列表用于存放ACDataPackPin数组资源
 #元素组成包括{str=name,str=type,list=shape,NDarray,};
 class ACDATA_DB:
     def __init__(self,ACDBname="ACDATA_DB"):
         self.ACDBname: str = ACDBname  # 数据库名称
-        self.acDataPackList: List[ACDataPack] = []
+        self.acDataPackList: List[AC_Array] = []
 
     def getACDBName(self):
         """获取数据库名称"""
@@ -210,18 +219,18 @@ class ACDATA_DB:
         """设置数据库名称"""
         self.ACDBname = newname
 
-    def findACDataPackByName(self,acdpname):
+    def AC_getArrayByName(self,acdpname):
         for i, acDataPack in enumerate(self.acDataPackList):
             if acDataPack.getName() == acdpname:
                 return True,i,acDataPack
         print(f"ACDATA_DB: {acdpname} not found in ACDATA_DB")
         return False,-1,None
 
-    def addACDataPack(self, acDataPack: ACDataPack, replaceIfExists=False):
+    def addACDataPack(self, acDataPack: AC_Array, replaceIfExists=False):
         """添加一个ACDataPack到数据库"""
-        if not isinstance(acDataPack, ACDataPack):
-            raise TypeError("acDataPack must be an instance of ACDataPack.")
-        isExist, index, existingPack = self.findACDataPackByName(acDataPack.getName())
+        if not isinstance(acDataPack, AC_Array):
+            raise TypeError("acDataPack must be an instance of AC_Array.")
+        isExist, index, existingPack = self.AC_getArrayByName(acDataPack.getName())
         if isExist and replaceIfExists:
             print(f"ACDATA_DB: {acDataPack.getName()} already exists in ACDATA_DB, replacing it.")
             existingPack.nullifySelf()  # 释放资源
@@ -235,7 +244,7 @@ class ACDATA_DB:
 
     def removeACDataPackByName(self, acdpname):
         """通过名字查找，从数据库中移除一个ACDataPack"""
-        isExist, index, existingPack = self.findACDataPackByName(acdpname)
+        isExist, index, existingPack = self.AC_getArrayByName(acdpname)
         if not isExist:
             print(f"ACDATA_DB: {acdpname} not found in ACDATA_DB")
             return False
@@ -247,7 +256,7 @@ class ACDATA_DB:
 
     def getACDataPackByName(self, acdpname):
         """通过名字查找，获取一个ACDataPack"""
-        isExist, index, existingPack = self.findACDataPackByName(acdpname)
+        isExist, index, existingPack = self.AC_getArrayByName(acdpname)
         if not isExist:
             print(f"ACDATA_DB: {acdpname} not found in ACDATA_DB")
             return None
@@ -266,138 +275,10 @@ class ACDATA_DB:
     def getsizeDB(self):
         return len(self.acDataPackList)
 
+
+
 #定义ACDATA_DB的默认实例，用于默认存放数组资源
 default_ACDB = ACDATA_DB(ACDBname="default_ACDB")
 
 ACDB_List = []  # 全局列表，用于存放ACDATA_DB实例
 ACDB_List.append(default_ACDB)  # 将默认实例添加到列表中
-
-#定义ACDATALib类，继承自FunctionLibraryBase
-class ACDATALib(FunctionLibraryBase):
-    '''doc string for ACDATALib'''
-
-    def __init__(self, packageName):
-        super(ACDATALib, self).__init__(packageName)
-
-    @staticmethod
-    @IMPLEMENT_NODE(returns=None,nodeType=NodeTypes.Callable, meta={NodeMeta.CATEGORY: 'ACDATALib', NodeMeta.KEYWORDS: []})
-    def ACDATA_freeAllArrays(
-        freeFinished=(REF,('BoolPin',None))):
-        """Docstrings are in **rst** format!"""
-        global default_ACDB
-        for acDataPack in default_ACDB.acDataPackList:
-            acDataPack.freeArray()
-        freeFinished(True)
-            
-
-    @staticmethod
-    @IMPLEMENT_NODE(returns=None,nodeType=NodeTypes.Callable, meta={NodeMeta.CATEGORY: 'ACDATALib', NodeMeta.KEYWORDS: []})
-    def ACDATA_defineACDPVAR(
-        varName=('StringPin',"ACDP_EMPTY"),
-        varType=('StringPin',"double"),
-        varShape=('StringPin',"[0]"),
-        varState=('BoolPin',False),
-        acDataPack=(REF,('ACDataPackPin',None)),
-        result=(REF,('BoolPin',False))):
-        """define an ACDP variable, but not registerd!"""
-        #result.enableOptions(PinOptions.RenamingEnabled)
-        global default_ACDB
-        tempACDP:ACDataPackPinStruct= ACDataPackPinStruct.getEmptyACDPPS()
-        tempACDP["NDname"]  = varName
-        tempACDP["NDtype"]  = varType
-        tempACDP["NDshape"] = ast.literal_eval(varShape)  # 将字符串转换为列表
-        tempACDP["NDstate"] = varState  # 直接使用布尔值
-        acDataPack(tempACDP)  # 将数据打包到acDataPack中
-        #result.createOutputPin(varName, 'StringPin', constraint=varName, structConstraint=varName, structure=StructureType.Multi)
-        result(True)
-        #result.rename(varName)  # 重命名输出引脚为变量名
-        #isExist, index, existingPack = default_ACDB.findACDataPackByName(varName)
-        
-
-    @staticmethod
-    @IMPLEMENT_NODE(returns=None,nodeType=NodeTypes.Callable, meta={NodeMeta.CATEGORY: 'ACDATALib', NodeMeta.KEYWORDS: []})
-    def ACDATA_newArray(
-        inDataPackPS=('ACDataPackPin',None),
-        outDataPackPS=(REF,('ACDataPackPin',None)),
-        DBIndex=(REF,('IntPin',-1)),
-        dataName=(REF,('StringPin',None)),
-        dataType=(REF,('StringPin',None)),
-        dataShape=(REF,('StringPin',None)),
-        dataState=(REF,('BoolPin',None))):
-        """Docstrings are in **rst** format!"""
-        global default_ACDB
-        acdpname =inDataPackPS['NDname']
-        acdptype =inDataPackPS['NDtype']
-        acdpshape=inDataPackPS['NDshape']
-        acdpstate=inDataPackPS['NDstate']
-        acdptypeND=ACGetTypeByString(acdptype)
-        acdpshapeND=np.array(acdpshape)
-        isExist, index, existingPack = default_ACDB.findACDataPackByName(acdpname)
-        if isExist:
-            print(f"ACDATA_newArray: {acdpname} already exists in ACDATA_DB")
-            index=index+1
-        else:
-            existingPack=ACDataPack(acdpname,acdptypeND,acdpshapeND,acdpstate,None)
-            default_ACDB.acDataPackList.append(existingPack)
-            index=default_ACDB.getsizeDB()
-        if acdpstate and not existingPack.getState():#如果需要分配，但是实际未分配
-            existingPack.refreshArray()
-        acdpstate=existingPack.getState()
-        inDataPackPS['NDstate']=acdpstate
-        outDataPackPS(inDataPackPS)#=(REF,('StringPin',None)),
-        DBIndex(index)#=(REF,('IntPin',None)),
-        dataName(acdpname)#=(REF,('StringPin',None)),
-        dataType(acdptype)#=(REF,('StringPin',None)),
-        dataShape(str(acdpshape))#=(REF,('StringPin',None)),
-        dataState(acdpstate)#=(REF,('BoolPin',None))):
-        return not isExist
-
-
-
-    @staticmethod
-    @IMPLEMENT_NODE(returns=None,nodeType=NodeTypes.Callable, meta={NodeMeta.CATEGORY: 'ACDATALib', NodeMeta.KEYWORDS: []})
-    def ACDATA_freeArray(
-        inDataPack=('ACDataPackPin',None),
-        outDataPack=(REF,('ACDataPackPin',None)),
-        result    =(REF,('BoolPin',None))):
-        """free a specific ndarray by name!"""
-        global default_ACDB
-        acdpname  = inDataPack["NDname"]  # 获取数组名称
-        acdptype  = inDataPack["NDtype"]
-        acdpshape = inDataPack["NDshape"]
-        acdpstate = inDataPack["NDstate"]
-        isExist, index, existingPack = default_ACDB.findACDataPackByName(acdpname)
-        if isExist:
-            existingPack.freeArray()
-            existingPack.setState(False)  # 设置状态为False
-            inDataPack["NDstate"]=False
-            result(True)
-            return True
-        else:
-            print(f"ACDATA_freeArray: {acdpname} not found in ACDATA_DB")
-            inDataPack["NDstate"]=False
-            result(False)
-        outDataPack(inDataPack)
-        return isExist
-
-    @staticmethod
-    @IMPLEMENT_NODE(returns=None,nodeType=NodeTypes.Callable, meta={NodeMeta.CATEGORY: 'ACDATALib', NodeMeta.KEYWORDS: []})
-    def ACDATA_getArrayByName(
-        ndname=('StringPin',"acdp_null"),
-        acDataPack=(REF,('ACDataPackPin',None))):
-        """Docstrings are in **rst** format!"""
-        global default_ACDB
-        isExist, index, existingPack = default_ACDB.findACDataPackByName(ndname)
-        if not isExist:
-            print(f"ACDATA_getArrayByName: {ndname} not found in ACDATA_DB")
-            acDataPack(None)
-            return False
-        tmpACDPPS:ACDataPackPinStruct=ACDataPackPinStruct.getEmptyACDPPS()
-        tmpACDPPS['NDname']=existingPack.getName()
-        tmpACDPPS['NDtype']=ACGetStringByType(existingPack.getType())
-        tmpACDPPS['NDshape']=(existingPack.getShape()).tolist()
-        tmpACDPPS['NDstate']=existingPack.getState()
-        acDataPack(tmpACDPPS)
-        print(index)
-        print(existingPack.__str__())
-        return True
