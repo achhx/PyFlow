@@ -151,6 +151,9 @@ class Variable(IItemBase):
         self._name = value
         self.nameChanged.send(value)
 
+        if self._dataType == "AC_ArrayPin":  #ACHHX get variable name to AC_ArrayPin de NDname
+            self._value["NDname"] = value
+
     @property
     def value(self):
         """Variable value
@@ -191,6 +194,9 @@ class Variable(IItemBase):
             self.updatePackageName()
             self.value = getPinDefaultValueByType(value)
             self.dataTypeChanged.send(value)
+
+            if self._dataType == "AC_ArrayPin":  #ACHHX get variable name to AC_ArrayPin de NDname
+                self._value["NDname"]=self._name
 
     @property
     def structure(self):
