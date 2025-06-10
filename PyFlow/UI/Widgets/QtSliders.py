@@ -502,8 +502,9 @@ class valueBox(SciDoubleSpinBox): #ACHHX  change QtWidgets.QDoubleSpinBox to  Sc
                     self.draggers = draggers(
                         self, self.isFloat, draggerSteps=self.draggerSteps
                     )
+                    self.draggers.activeDrag=inputDragger(self.draggers, 1.0)  #ACHHX TODO set default dragger to 1.0   #ACHHX set default value of activeDrag
                     self.draggers.increment.connect(self.onValueIncremented)
-                    self.draggers.decrement.connect(self.onValueDecremented) #ACHHX TODO added to handle decrease, but not used yet
+                    #self.draggers.decrement.connect(self.onValueDecremented) #ACHHX TODO added to handle decrease, but not used yet
                 self.draggers.show()
                 if self.isFloat:
                     self.draggers.move(
