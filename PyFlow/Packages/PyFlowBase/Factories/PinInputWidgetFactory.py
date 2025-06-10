@@ -80,6 +80,7 @@ class AC_ArrayPinInputWidget(InputWidgetSingle):
         self.xtype.editingFinished.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
         self.xshape.editingFinished.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
         self.xstate.stateChanged.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
+        print("AC_ArrayPinInputWidget initialized with dataSetCallback:", self.dataSetCallback)
 
 
 

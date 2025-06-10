@@ -37,6 +37,7 @@ from PyFlow import getPinDefaultValueByType
 from PyFlow.UI.Widgets.EnumComboBox import EnumComboBox
 from PyFlow import findPinClassByType
 from PyFlow import getAllPinClasses
+import ast
 
 
 # Colored rounded rect
@@ -255,10 +256,10 @@ class UIVariable(QWidget, IPropertiesViewSupport):
                     w.setObjectName(self._rawVariable.name)
                     valueCategory.addWidget(self._rawVariable.name, w)
             elif self._rawVariable.dataType == "AC_ArrayPin":
-                def valSetter(xname:str,xtype:str,xshape:list[int],xstate:bool):
+                def valSetter(xname:str,xtype:str,xshape:str,xstate:bool):
                     self._rawVariable.value["NDname" ] = xname
                     self._rawVariable.value["NDtype" ] = xtype
-                    self._rawVariable.value["NDshape"] = xshape
+                    self._rawVariable.value["NDshape"] = ast.literal_eval(xshape)
                     self._rawVariable.value["NDstate"] = xstate
                 w = createInputWidget(
                     self._rawVariable.dataType,
