@@ -254,6 +254,21 @@ class UIVariable(QWidget, IPropertiesViewSupport):
                     w.setWidgetValue(self._rawVariable.value)
                     w.setObjectName(self._rawVariable.name)
                     valueCategory.addWidget(self._rawVariable.name, w)
+            elif self._rawVariable.dataType == "AC_ArrayPin":
+                def valSetter(xname:str,xtype:str,xshape:list[int],xstate:bool):
+                    self._rawVariable.value["NDname" ] = xname
+                    self._rawVariable.value["NDtype" ] = xtype
+                    self._rawVariable.value["NDshape"] = xshape
+                    self._rawVariable.value["NDstate"] = xstate
+                w = createInputWidget(
+                    self._rawVariable.dataType,
+                    valSetter,
+                    getPinDefaultValueByType(self._rawVariable.dataType),
+                )
+                if w:
+                    w.setWidgetValue(self._rawVariable.value)
+                    w.setObjectName(self._rawVariable.name)
+                    valueCategory.addWidget(self._rawVariable.name, w)
 
         # access level
         cb = QComboBox()

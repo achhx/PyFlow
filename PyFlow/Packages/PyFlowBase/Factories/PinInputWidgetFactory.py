@@ -39,6 +39,63 @@ class ExecInputWidget(InputWidgetSingle):
         pass
 
 
+class AC_ArrayPinInputWidget(InputWidgetSingle):
+    """
+    Input widget for AC_ArrayPin
+    """
+
+    def __init__(self, parent=None, **kwargs):
+        super(AC_ArrayPinInputWidget, self).__init__(parent=parent, **kwargs)
+        
+        container = QWidget(self)
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.xname = QLineEdit(container)
+        self.xname.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+        self.xname.setPlaceholderText("Name")
+        layout.addWidget(self.xname)
+                
+        self.xtype = QLineEdit(container)
+        self.xtype.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+        self.xtype.setPlaceholderText("Type")
+        layout.addWidget(self.xtype) 
+                
+        self.xshape = QLineEdit(container)
+        self.xshape.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+        self.xshape.setPlaceholderText("Shape")
+        layout.addWidget(self.xshape) 
+                
+        self.xstate = QCheckBox(container)
+        self.xstate.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+        self.xstate.setText("State")
+        self.xstate.setChecked(True)
+        layout.addWidget(self.xstate)
+        
+        self.setWidget(container)
+
+        # 信号连接
+        self.dataSetCallback = kwargs.get("dataSetCallback", None)
+        self.xname.editingFinished.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
+        self.xtype.editingFinished.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
+        self.xshape.editingFinished.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
+        self.xstate.stateChanged.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
+
+
+
+    def blockWidgetSignals(self, bLock=False):
+        #ACHHX TODO
+        pass
+
+    def setWidgetValue(self, val):
+        self.xname.setText(str(val.get("NDname", "")))
+        self.xtype.setText(str(val.get("NDtype", "")))
+        self.xshape.setText(str(val.get("NDshape", "")))
+        self.xstate.setChecked(bool(val.get("NDstate", False)))
+        
+
+
+
 class FloatInputWidgetSimple(InputWidgetSingle):
     """
     Floating point data input widget without enhancements
@@ -315,6 +372,13 @@ def getInputWidget(
         return FloatInputWidgetSimple(
             dataSetCallback=dataSetter, defaultValue=defaultValue, **kwds
         )
+    
+    if dataType == "AC_ArrayPin":
+        return AC_ArrayPinInputWidget(
+            dataSetCallback=dataSetter, defaultValue=defaultValue, **kwds
+        )
+
+
     if dataType == "IntPin":
         if kwds is not None and "pinAnnotations" in kwds:
             if (
