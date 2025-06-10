@@ -102,7 +102,6 @@ class VariablesWidget(QWidget, Ui_Form):
     def createVariable(
         self, dataType="AnyPin", accessLevel=AccessLevel.public, uid=None
     ):
-        print(dataType)
         rawVariable = (
             self.pyFlowInstance.graphManager.get()
             .activeGraph()
