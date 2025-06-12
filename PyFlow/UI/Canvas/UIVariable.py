@@ -256,11 +256,11 @@ class UIVariable(QWidget, IPropertiesViewSupport):
                     w.setObjectName(self._rawVariable.name)
                     valueCategory.addWidget(self._rawVariable.name, w)
             elif self._rawVariable.dataType == "AC_ArrayPin":
-                def valSetter(xname:str,xtype:str,xshape:str,xstate:bool):
-                    self._rawVariable.value["NDname" ] = xname
-                    self._rawVariable.value["NDtype" ] = xtype
-                    self._rawVariable.value["NDshape"] = ast.literal_eval(xshape)
-                    self._rawVariable.value["NDstate"] = xstate
+                def valSetter(val):#{xname:str,xtype:str,xshape:str,xstate:bool}
+                    self._rawVariable.value["NDname" ] = val["NDname"]
+                    self._rawVariable.value["NDtype" ] = val["NDtype"]
+                    self._rawVariable.value["NDshape"] = ast.literal_eval(val["NDshape"])
+                    self._rawVariable.value["NDstate"] = val["NDstate"]
                 w = createInputWidget(
                     self._rawVariable.dataType,
                     valSetter,

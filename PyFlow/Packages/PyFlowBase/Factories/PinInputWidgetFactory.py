@@ -52,6 +52,7 @@ class AC_ArrayPinInputWidget(InputWidgetSingle):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.xname = QLineEdit(container)
+        self.xname.setDisabled(True)  # Name is not editable
         self.xname.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.xname.setPlaceholderText("Name")
         layout.addWidget(self.xname)
@@ -75,13 +76,20 @@ class AC_ArrayPinInputWidget(InputWidgetSingle):
         self.setWidget(container)
 
         # 信号连接
-        self.dataSetCallback = kwargs.get("dataSetCallback", None)
-        self.xname.editingFinished.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
-        self.xtype.editingFinished.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
-        self.xshape.editingFinished.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
-        self.xstate.stateChanged.connect(lambda: self.dataSetCallback(self.xname.text(), self.xtype.text(), self.xshape.text(), bool(self.xstate.isChecked())) if self.dataSetCallback else None)
+        #self.dataSetCallback = kwargs.get("dataSetCallback", None)
+        
+        tmpLambda=lambda: self.dataSetCallback(self.getCurrentValue())
+        self.xname.editingFinished.connect(tmpLambda)
+        self.xtype.editingFinished.connect(tmpLambda)
+        self.xshape.editingFinished.connect(tmpLambda)
+        self.xstate.stateChanged.connect(tmpLambda)
         print("AC_ArrayPinInputWidget initialized with dataSetCallback:", self.dataSetCallback)
 
+    def getCurrentValue(self):
+        return {"NDname": self.xname.text(),
+                "NDtype": self.xtype.text(),
+                "NDshape": self.xshape.text(),
+                "NDstate": bool(self.xstate.isChecked())}
 
 
     def blockWidgetSignals(self, bLock=False):
