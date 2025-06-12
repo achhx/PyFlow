@@ -487,7 +487,8 @@ class valueBox(SciDoubleSpinBox): #ACHHX  change QtWidgets.QDoubleSpinBox to  Sc
 
     def onValueIncremented(self, step):
         self.valueIncremented.emit(step)
-        val = self.value() + step
+        self.setSingleStep(step)  #ACHHX update to setSingleStep to support float values (By MouZhuXing)
+        val = self.value()        #+ step  #ACHHX TRY TODO
         self.setValue(val)
 
     def onValueDecremented(self, step):  #ACHHX TODO added to handle decrease, but not used yet
@@ -502,7 +503,7 @@ class valueBox(SciDoubleSpinBox): #ACHHX  change QtWidgets.QDoubleSpinBox to  Sc
                     self.draggers = draggers(
                         self, self.isFloat, draggerSteps=self.draggerSteps
                     )
-                    self.draggers.activeDrag=inputDragger(self.draggers, 1.0)  #ACHHX TODO set default dragger to 1.0   #ACHHX set default value of activeDrag
+                    self.draggers.activeDrag=inputDragger(self.draggers, self.singleStep())  #ACHHX TODO set default dragger to 1.0   #ACHHX set default value of activeDrag
                     self.draggers.increment.connect(self.onValueIncremented)
                     #self.draggers.decrement.connect(self.onValueDecremented) #ACHHX TODO added to handle decrease, but not used yet
                 self.draggers.show()
@@ -515,17 +516,17 @@ class valueBox(SciDoubleSpinBox): #ACHHX  change QtWidgets.QDoubleSpinBox to  Sc
                             )
                         )
                     )
-                    if self.draggers.activeDrag is not None:              #ACHHX Enable to set the dragger step using middlebutton hold & move
-                        new_step=float(self.draggers.activeDrag._factor)  #ACHHX TODO PROBLEM: The set value delays to next step?
-                        self.setSingleStep(new_step)  # Ensure float type #ACHHX TODO PROBLEM: int not supported yet
-                        self.lineEdit().step=new_step
-                        self.lineEdit().update()
-                        self.update()
+                    #if self.draggers.activeDrag is not None:              #ACHHX Enable to set the dragger step using middlebutton hold & move
+                        #new_step=float(self.draggers.activeDrag._factor)  #ACHHX TODO PROBLEM: The set value delays to next step?
+                        #self.setSingleStep(new_step)  # Ensure float type #ACHHX TODO PROBLEM: int not supported yet
+                        #self.lineEdit().step=new_step
+                        #self.lineEdit().update()
+                        #self.update()
                         #self.draggers.repaint()
                         #self.draggers.setFocus()
                         #self.repaint()
-                    else:
-                        print("self.draggers.activeDrag is None")
+                    #else:
+                        #print("self.draggers.activeDrag is None")
                 else:
                     self.draggers.move(
                         self.mapToGlobal(
