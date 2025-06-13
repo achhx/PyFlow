@@ -219,7 +219,7 @@ class ACDATA_DB:
         """设置数据库名称"""
         self.ACDBname = newname
 
-    def AC_getArrayByName(self,acdpname):
+    def getArrayByName(self,acdpname):
         for i, acDataPack in enumerate(self.acDataPackList):
             if acDataPack.getName() == acdpname:
                 return True,i,acDataPack
@@ -282,3 +282,5 @@ default_ACDB = ACDATA_DB(ACDBname="default_ACDB")
 
 ACDB_List = []  # 全局列表，用于存放ACDATA_DB实例
 ACDB_List.append(default_ACDB)  # 将默认实例添加到列表中
+
+default_ACVW = [] #  # 全局列表，用于存放VariablesWidget实例
