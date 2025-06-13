@@ -21,10 +21,10 @@ class AC_ALGORITHM(FunctionLibraryBase):
         outArray=('AC_ArrayPin',None,{PinSpecifiers.CONSTRAINT: "1",}),
         result  =(REF,('BoolPin',None))):
         """free a specific ndarray by name!"""        
-        isExistL, indexL, leftDataPack  = default_ACDB.AC_getArrayByName( inLeft["NDname"])
+        isExistL, indexL, leftDataPack  = default_ACDB.getArrayByName( inLeft["NDname"])
         leftArray  = leftDataPack.getArray()
         if type(inRight) == AC_ArrayPinStruct:
-            isExistR, indexR, rightDataPack = default_ACDB.AC_getArrayByName(inRight["NDname"])
+            isExistR, indexR, rightDataPack = default_ACDB.getArrayByName(inRight["NDname"])
             rightArray = rightDataPack.getArray()
         elif type(inRight) == int or type(inRight) == float:
             isExistR   = True
@@ -32,7 +32,7 @@ class AC_ALGORITHM(FunctionLibraryBase):
         else:
             isExistR   = False
             rightArray = None
-        isExistO, indexO, outDataPack   = default_ACDB.AC_getArrayByName(    outArray["NDname"])
+        isExistO, indexO, outDataPack   = default_ACDB.getArrayByName(    outArray["NDname"])
         outArray   = outDataPack.getArray()
         if isExistL and isExistR and isExistO:
             outArray   = leftArray + rightArray
@@ -53,10 +53,10 @@ class AC_ALGORITHM(FunctionLibraryBase):
         outArray=('AC_ArrayPin',None,{PinSpecifiers.CONSTRAINT: "1",}),
         result  =(REF,('BoolPin',None))):
         """free a specific ndarray by name!"""        
-        isExistL, indexL, leftDataPack  = default_ACDB.AC_getArrayByName( inLeft["NDname"])
+        isExistL, indexL, leftDataPack  = default_ACDB.getArrayByName( inLeft["NDname"])
         leftArray  = leftDataPack.getArray()
         if type(inRight) == AC_ArrayPinStruct:
-            isExistR, indexR, rightDataPack = default_ACDB.AC_getArrayByName(inRight["NDname"])
+            isExistR, indexR, rightDataPack = default_ACDB.getArrayByName(inRight["NDname"])
             rightArray = rightDataPack.getArray()
         elif type(inRight) == int or type(inRight) == float:
             isExistR   = True
@@ -64,7 +64,7 @@ class AC_ALGORITHM(FunctionLibraryBase):
         else:
             isExistR   = False
             rightArray = None
-        isExistO, indexO, outDataPack   = default_ACDB.AC_getArrayByName(    outArray["NDname"])
+        isExistO, indexO, outDataPack   = default_ACDB.getArrayByName(    outArray["NDname"])
         outArray   = outDataPack.getArray()
         if isExistL and isExistR and isExistO:
             outArray   = leftArray - rightArray
@@ -85,10 +85,10 @@ class AC_ALGORITHM(FunctionLibraryBase):
         outArray=('AC_ArrayPin',None,{PinSpecifiers.CONSTRAINT: "1",}),
         result  =(REF,('BoolPin',None))):
         """free a specific ndarray by name!"""        
-        isExistL, indexL, leftDataPack  = default_ACDB.AC_getArrayByName( inLeft["NDname"])
+        isExistL, indexL, leftDataPack  = default_ACDB.getArrayByName( inLeft["NDname"])
         leftArray  = leftDataPack.getArray()
         if type(inRight) == AC_ArrayPinStruct:
-            isExistR, indexR, rightDataPack = default_ACDB.AC_getArrayByName(inRight["NDname"])
+            isExistR, indexR, rightDataPack = default_ACDB.getArrayByName(inRight["NDname"])
             rightArray = rightDataPack.getArray()
         elif type(inRight) == int or type(inRight) == float:
             isExistR   = True
@@ -96,7 +96,7 @@ class AC_ALGORITHM(FunctionLibraryBase):
         else:
             isExistR   = False
             rightArray = None
-        isExistO, indexO, outDataPack   = default_ACDB.AC_getArrayByName(    outArray["NDname"])
+        isExistO, indexO, outDataPack   = default_ACDB.getArrayByName(    outArray["NDname"])
         outArray   = outDataPack.getArray()
         if isExistL and isExistR and isExistO:
             outArray   = leftArray * rightArray
@@ -116,10 +116,10 @@ class AC_ALGORITHM(FunctionLibraryBase):
         outArray=('AC_ArrayPin',None,{PinSpecifiers.CONSTRAINT: "1",}),
         result  =(REF,('BoolPin',None))):
         """free a specific ndarray by name!"""        
-        isExistL, indexL, leftDataPack  = default_ACDB.AC_getArrayByName( inLeft["NDname"])
+        isExistL, indexL, leftDataPack  = default_ACDB.getArrayByName( inLeft["NDname"])
         leftArray  = leftDataPack.getArray()
         if type(inRight) == AC_ArrayPinStruct:
-            isExistR, indexR, rightDataPack = default_ACDB.AC_getArrayByName(inRight["NDname"])
+            isExistR, indexR, rightDataPack = default_ACDB.getArrayByName(inRight["NDname"])
             rightArray = rightDataPack.getArray()
         elif type(inRight) == int or type(inRight) == float:
             isExistR   = True
@@ -127,7 +127,7 @@ class AC_ALGORITHM(FunctionLibraryBase):
         else:
             isExistR   = False
             rightArray = None
-        isExistO, indexO, outDataPack   = default_ACDB.AC_getArrayByName(    outArray["NDname"])
+        isExistO, indexO, outDataPack   = default_ACDB.getArrayByName(    outArray["NDname"])
         outArray   = outDataPack.getArray()
         if isExistL and isExistR and isExistO:
             outArray   = leftArray / rightArray
@@ -148,10 +148,10 @@ class AC_ALGORITHM(FunctionLibraryBase):
         outArray =('AC_ArrayPin',None,{PinSpecifiers.CONSTRAINT: "1",}),
         result   =(REF,('BoolPin',None))):
         """free a specific ndarray by name!"""        
-        isExistL, indexL, leftDataPack  = default_ACDB.AC_getArrayByName( inLeft["NDname"])
+        isExistL, indexL, leftDataPack  = default_ACDB.getArrayByName( inLeft["NDname"])
         leftArray  = leftDataPack.getArray()
         if type(inMiddle) == AC_ArrayPinStruct:
-            isExistM, indexM, middleDataPack = default_ACDB.AC_getArrayByName(inMiddle["NDname"])
+            isExistM, indexM, middleDataPack = default_ACDB.getArrayByName(inMiddle["NDname"])
             middleArray = middleDataPack.getArray()
         elif type(inMiddle) == int or type(inMiddle) == float:
             isExistM    = True
@@ -160,7 +160,7 @@ class AC_ALGORITHM(FunctionLibraryBase):
             isExistM    = False
             middleArray = None
         if type(inRight) == AC_ArrayPinStruct:
-            isExistR, indexR, rightDataPack = default_ACDB.AC_getArrayByName(inRight["NDname"])
+            isExistR, indexR, rightDataPack = default_ACDB.getArrayByName(inRight["NDname"])
             rightArray = rightDataPack.getArray()
         elif type(inRight) == int or type(inRight) == float:
             isExistR   = True
@@ -168,7 +168,7 @@ class AC_ALGORITHM(FunctionLibraryBase):
         else:
             isExistR   = False
             rightArray = None
-        isExistO, indexO, outDataPack   = default_ACDB.AC_getArrayByName(    outArray["NDname"])
+        isExistO, indexO, outDataPack   = default_ACDB.getArrayByName(    outArray["NDname"])
         outArray   = outDataPack.getArray()
         if isExistL and isExistM and isExistR and isExistO:
             outArray   = leftArray * middleArray + rightArray
