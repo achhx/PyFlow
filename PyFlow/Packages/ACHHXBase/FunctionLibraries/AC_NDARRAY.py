@@ -48,7 +48,7 @@ class AC_NDARRAY(FunctionLibraryBase):
         #result.createOutputPin(varName, 'StringPin', constraint=varName, structConstraint=varName, structure=StructureType.Multi)
         result(True)
         #result.rename(varName)  # 重命名输出引脚为变量名
-        #isExist, index, existingPack = default_ACDB.AC_getArrayByName(varName)
+        #isExist, index, existingPack = default_ACDB.getArrayByName(varName)
         
 
     @staticmethod
@@ -69,7 +69,7 @@ class AC_NDARRAY(FunctionLibraryBase):
         acdpstate=inDataPackPS['NDstate']
         acdptypeND=ACGetTypeByString(acdptype)
         acdpshapeND=np.array(acdpshape)
-        isExist, index, existingPack = default_ACDB.AC_getArrayByName(acdpname)
+        isExist, index, existingPack = default_ACDB.getArrayByName(acdpname)
         if isExist:
             print(f"AC_newArray: {acdpname} already exists in ACDATA_DB")
             index=index+1
@@ -82,11 +82,26 @@ class AC_NDARRAY(FunctionLibraryBase):
         acdpstate=existingPack.getState()
         inDataPackPS['NDstate']=acdpstate
         outDataPackPS(inDataPackPS)#=(REF,('StringPin',None)),
+        from PyFlow.Packages.PyFlowBase.Nodes.setVar import setVar
+        #from PyFlow.Core.Variable import Variable
+        #from PyFlow.UI.Canvas.UIVariable import UIVariable
+        #from PyFlow.UI.Views.VariablesWidget import VariablesWidget
+        #from PyFlow.UI.Views.VariablesWidget import instance as variablesWidgetInstance
+        for eachVar in default_ACVW:
+            if eachVar._rawVariable._dataType=="AC_ArrayPin" and eachVar._rawVariable._name == acdpname:
+                print(f"AC_newArray: {acdpname} already exists in ACDATA_VW")
+                tmpSetVar=setVar(eachVar._rawVariable._name,eachVar._rawVariable)
+                tmpSetVar.inp=outDataPackPS.__self__
+                tmpSetVar.compute()
+                print(f"AC_newArray: {acdpname} updated in ACDATA_VW")
+        
+        #default_ACVW[0]._rawVariable._name
+        #setVar(acdpname,outDataPackPS)
         DBIndex(index)#=(REF,('IntPin',None)),
         dataName(acdpname)#=(REF,('StringPin',None)),
         dataType(acdptype)#=(REF,('StringPin',None)),
         dataShape(str(acdpshape))#=(REF,('StringPin',None)),
-        dataState(acdpstate)#=(REF,('BoolPin',None))):
+        dataState(acdpstate)#=(REF,('BoolPin',None))
         return not isExist
 
 
@@ -103,7 +118,7 @@ class AC_NDARRAY(FunctionLibraryBase):
         acdptype  = inDataPack["NDtype"]
         acdpshape = inDataPack["NDshape"]
         acdpstate = inDataPack["NDstate"]
-        isExist, index, existingPack = default_ACDB.AC_getArrayByName(acdpname)
+        isExist, index, existingPack = default_ACDB.getArrayByName(acdpname)
         if isExist:
             existingPack.freeArray()
             existingPack.setState(False)  # 设置状态为False
@@ -124,7 +139,7 @@ class AC_NDARRAY(FunctionLibraryBase):
         acDataPack=(REF,('AC_ArrayPin',None))):
         """Docstrings are in **rst** format!"""
         #global default_ACDB
-        isExist, index, existingPack = default_ACDB.AC_getArrayByName(ndname)
+        isExist, index, existingPack = default_ACDB.getArrayByName(ndname)
         if not isExist:
             print(f"AC_getArrayByName: {ndname} not found in ACDATA_DB")
             acDataPack(None)

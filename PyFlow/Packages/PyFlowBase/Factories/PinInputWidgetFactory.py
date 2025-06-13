@@ -83,7 +83,7 @@ class AC_ArrayPinInputWidget(InputWidgetSingle):
         self.xtype.editingFinished.connect(tmpLambda)
         self.xshape.editingFinished.connect(tmpLambda)
         self.xstate.stateChanged.connect(tmpLambda)
-        print("AC_ArrayPinInputWidget initialized with dataSetCallback:", self.dataSetCallback)
+        #print("AC_ArrayPinInputWidget initialized with dataSetCallback:", self.dataSetCallback)
 
     def getCurrentValue(self):
         return {"NDname": self.xname.text(),

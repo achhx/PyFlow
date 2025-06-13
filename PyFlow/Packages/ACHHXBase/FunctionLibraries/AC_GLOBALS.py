@@ -219,7 +219,7 @@ class ACDATA_DB:
         """设置数据库名称"""
         self.ACDBname = newname
 
-    def AC_getArrayByName(self,acdpname):
+    def getArrayByName(self,acdpname):
         for i, acDataPack in enumerate(self.acDataPackList):
             if acDataPack.getName() == acdpname:
                 return True,i,acDataPack
@@ -230,7 +230,7 @@ class ACDATA_DB:
         """添加一个ACDataPack到数据库"""
         if not isinstance(acDataPack, AC_Array):
             raise TypeError("acDataPack must be an instance of AC_Array.")
-        isExist, index, existingPack = self.AC_getArrayByName(acDataPack.getName())
+        isExist, index, existingPack = self.getArrayByName(acDataPack.getName())
         if isExist and replaceIfExists:
             print(f"ACDATA_DB: {acDataPack.getName()} already exists in ACDATA_DB, replacing it.")
             existingPack.nullifySelf()  # 释放资源
@@ -244,7 +244,7 @@ class ACDATA_DB:
 
     def removeACDataPackByName(self, acdpname):
         """通过名字查找，从数据库中移除一个ACDataPack"""
-        isExist, index, existingPack = self.AC_getArrayByName(acdpname)
+        isExist, index, existingPack = self.getArrayByName(acdpname)
         if not isExist:
             print(f"ACDATA_DB: {acdpname} not found in ACDATA_DB")
             return False
@@ -256,7 +256,7 @@ class ACDATA_DB:
 
     def getACDataPackByName(self, acdpname):
         """通过名字查找，获取一个ACDataPack"""
-        isExist, index, existingPack = self.AC_getArrayByName(acdpname)
+        isExist, index, existingPack = self.getArrayByName(acdpname)
         if not isExist:
             print(f"ACDATA_DB: {acdpname} not found in ACDATA_DB")
             return None
@@ -282,3 +282,5 @@ default_ACDB = ACDATA_DB(ACDBname="default_ACDB")
 
 ACDB_List = []  # 全局列表，用于存放ACDATA_DB实例
 ACDB_List.append(default_ACDB)  # 将默认实例添加到列表中
+
+default_ACVW = [] #  # 全局列表，用于存放VariablesWidget实例
