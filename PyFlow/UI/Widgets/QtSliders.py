@@ -505,7 +505,6 @@ class valueBox(SciDoubleSpinBox): #ACHHX  change QtWidgets.QDoubleSpinBox to  Sc
                     )
                     self.draggers.activeDrag=inputDragger(self.draggers, self.singleStep())  #ACHHX TODO set default dragger to 1.0   #ACHHX set default value of activeDrag
                     self.draggers.increment.connect(self.onValueIncremented)
-                    #self.draggers.decrement.connect(self.onValueDecremented) #ACHHX TODO added to handle decrease, but not used yet
                 self.draggers.show()
                 if self.isFloat:
                     self.draggers.move(
@@ -516,17 +515,6 @@ class valueBox(SciDoubleSpinBox): #ACHHX  change QtWidgets.QDoubleSpinBox to  Sc
                             )
                         )
                     )
-                    #if self.draggers.activeDrag is not None:              #ACHHX Enable to set the dragger step using middlebutton hold & move
-                        #new_step=float(self.draggers.activeDrag._factor)  #ACHHX TODO PROBLEM: The set value delays to next step?
-                        #self.setSingleStep(new_step)  # Ensure float type #ACHHX TODO PROBLEM: int not supported yet
-                        #self.lineEdit().step=new_step
-                        #self.lineEdit().update()
-                        #self.update()
-                        #self.draggers.repaint()
-                        #self.draggers.setFocus()
-                        #self.repaint()
-                    #else:
-                        #print("self.draggers.activeDrag is None")
                 else:
                     self.draggers.move(
                         self.mapToGlobal(

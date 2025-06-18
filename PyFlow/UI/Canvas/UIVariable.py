@@ -38,6 +38,7 @@ from PyFlow.UI.Widgets.EnumComboBox import EnumComboBox
 from PyFlow import findPinClassByType
 from PyFlow import getAllPinClasses
 import ast
+import uuid
 
 
 # Colored rounded rect
@@ -255,21 +256,6 @@ class UIVariable(QWidget, IPropertiesViewSupport):
                     w.setWidgetValue(self._rawVariable.value)
                     w.setObjectName(self._rawVariable.name)
                     valueCategory.addWidget(self._rawVariable.name, w)
-            elif self._rawVariable.dataType == "AC_ArrayPin":
-                def valSetter(val):#{xname:str,xtype:str,xshape:str,xstate:bool}
-                    self._rawVariable.value["NDname" ] = val["NDname"]
-                    self._rawVariable.value["NDtype" ] = val["NDtype"]
-                    self._rawVariable.value["NDshape"] = ast.literal_eval(val["NDshape"])
-                    self._rawVariable.value["NDstate"] = val["NDstate"]
-                w = createInputWidget(
-                    self._rawVariable.dataType,
-                    valSetter,
-                    getPinDefaultValueByType(self._rawVariable.dataType),
-                )
-                if w:
-                    w.setWidgetValue(self._rawVariable.value)
-                    w.setObjectName(self._rawVariable.name)
-                    valueCategory.addWidget(self._rawVariable.name, w)
 
         # access level
         cb = QComboBox()
@@ -376,6 +362,11 @@ class UIVariable(QWidget, IPropertiesViewSupport):
             # don't save any variables
             # value will be calculated for this type of variables
             template["value"] = None
+        elif self._rawVariable.dataType == "AC_NDArrayPin":
+            # ACHHX  to support  json serialization of AC_NDArrayPin
+            template["value"] = json.dumps(
+                [self._rawVariable.value.shape,self._rawVariable.value.dtype.name], cls=pinClass.jsonEncoderClass()
+            )
         else:
             template["value"] = json.dumps(
                 self._rawVariable.value, cls=pinClass.jsonEncoderClass()
@@ -401,6 +392,10 @@ class UIVariable(QWidget, IPropertiesViewSupport):
 
         if data["dataType"] == "AnyPin":
             var.value = getPinDefaultValueByType("AnyPin")
+        elif data["dataType"] == "AC_NDArrayPin":
+            # ACHHX  to support  json deserialization of AC_NDArrayPin
+            ndshape, ndtype = json.loads(data["value"])
+            var.value = pinClass.internalDataStructure()(ndshape,dtype=ndtype)
         else:
             var.value = json.loads(data["value"], cls=pinClass.jsonDecoderClass())
 

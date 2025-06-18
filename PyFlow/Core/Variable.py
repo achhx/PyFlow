@@ -151,9 +151,6 @@ class Variable(IItemBase):
         self._name = value
         self.nameChanged.send(value)
 
-        if self._dataType == "AC_ArrayPin":  #ACHHX get variable name to AC_ArrayPin de NDname
-            self._value["NDname"] = value
-
     @property
     def value(self):
         """Variable value
@@ -195,9 +192,6 @@ class Variable(IItemBase):
             self.value = getPinDefaultValueByType(value)
             self.dataTypeChanged.send(value)
 
-            if self._dataType == "AC_ArrayPin":  #ACHHX get variable name to AC_ArrayPin de NDname
-                self._value["NDname"]=self._name
-
     @property
     def structure(self):
         """Variable structure
@@ -237,6 +231,8 @@ class Variable(IItemBase):
         template["name"] = self.name
         if self.dataType == "AnyPin":
             template["value"] = None
+        elif self.dataType == "AC_NDArrayPin": #ACHHX  to support  json serialization of AC_NDArrayPin
+            template["value"] = json.dumps([self.value.shape,self.value.dtype.name], cls=pinClass.jsonEncoderClass())
         else:
             template["value"] = json.dumps(self.value, cls=pinClass.jsonEncoderClass())
         if self.structure == StructureType.Dict:
@@ -266,7 +262,11 @@ class Variable(IItemBase):
 
             if dataType != "AnyPin":
                 pinClass = findPinClassByType(dataType)
-                value = json.loads(jsonData["value"], cls=pinClass.jsonDecoderClass())
+                if dataType == "AC_NDArrayPin":  # ACHHX to support json serialization of AC_NDArrayPin
+                    ndshape, ndtype = json.loads(jsonData["value"], cls=pinClass.jsonDecoderClass())
+                    value = pinClass.internalDataStructure()(ndshape, dtype=ndtype)
+                else:
+                    value = json.loads(jsonData["value"], cls=pinClass.jsonDecoderClass())
             else:
                 value = getPinDefaultValueByType("AnyPin")
 

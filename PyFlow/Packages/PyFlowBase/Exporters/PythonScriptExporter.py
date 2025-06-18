@@ -127,7 +127,7 @@ class PythonScriptExporter(IDataExporter):
     @staticmethod
     def doExport(pyFlowInstance):
 
-        supportedDataTypes = {"IntPin", "FloatPin", "BoolPin", "StringPin", "ExecPin"}
+        supportedDataTypes = {"IntPin", "FloatPin", "BoolPin", "StringPin", "ExecPin","AC_NDArrayPin"}  # ACHHX support AC_NDArrayPin;
         supportedStructures = {StructureType.Single, StructureType.Array, StructureType.Dict, StructureType.Multi}   #ACHHX support all kinds of structureType instead of Single only;
 
         script = "# -*- coding: utf-8 -*-\n\n"

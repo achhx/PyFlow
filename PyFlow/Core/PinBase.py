@@ -389,6 +389,13 @@ class PinBase(IPin):
         try:
             self.setData(json.loads(jsonData["value"], cls=self.jsonDecoderClass()))
         except Exception as e:
+            #if self.dataType == "AC_NDArrayPin":
+            #    # Special case for AC_NDArrayPin, which is not serializable by default
+            #    ndshape, ndtype = json.loads(jsonData["value"], cls=self.jsonDecoderClass())
+            #    pinClass = findPinClassByType(self.dataType)
+            #    value = pinClass.internalDataStructure()(ndshape, dtype=ndtype)
+            #    self.setData(value)
+            #else:
             self.setData(self.defaultValue())
 
         if "wrapper" in jsonData:
@@ -404,8 +411,13 @@ class PinBase(IPin):
         serializedData = None
         if not self.dataType == "AnyPin":
             if storable:
-                serializedData = json.dumps(self.currentData(),
-                    cls=self.jsonEncoderClass())
+                if type(self.currentData()) == findPinClassByType(self.dataType).internalDataStructure():
+                    # Special case for AC_NDArrayPin, which is not serializable by default
+                    serializedData = json.dumps([self.currentData().shape, self.currentData().dtype.name],
+                                            cls=self.jsonEncoderClass())
+                else:
+                    serializedData = json.dumps(self.currentData(),
+                                            cls=self.jsonEncoderClass())
             # else:
             #    serializedData = json.dumps(self.defaultValue(), cls=self.jsonEncoderClass())
 
