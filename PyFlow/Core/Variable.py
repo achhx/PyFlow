@@ -151,6 +151,10 @@ class Variable(IItemBase):
         self._name = value
         self.nameChanged.send(value)
 
+        if self._dataType == "AC_NDArrayPin":  #ACHHX get variable name to AC_NDArrayPin de NDname
+            self._value.dname = value
+
+
     @property
     def value(self):
         """Variable value
@@ -191,6 +195,8 @@ class Variable(IItemBase):
             self.updatePackageName()
             self.value = getPinDefaultValueByType(value)
             self.dataTypeChanged.send(value)
+            if self._dataType == "AC_NDArrayPin":  #ACHHX get variable name to AC_NDArrayPin de NDname
+                self._value.dname=self.name
 
     @property
     def structure(self):
@@ -265,6 +271,7 @@ class Variable(IItemBase):
                 if dataType == "AC_NDArrayPin":  # ACHHX to support json serialization of AC_NDArrayPin
                     ndshape, ndtype = json.loads(jsonData["value"], cls=pinClass.jsonDecoderClass())
                     value = pinClass.internalDataStructure()(ndshape, dtype=ndtype)
+                    value.dname = name
                 else:
                     value = json.loads(jsonData["value"], cls=pinClass.jsonDecoderClass())
             else:

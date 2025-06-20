@@ -394,8 +394,9 @@ class UIVariable(QWidget, IPropertiesViewSupport):
             var.value = getPinDefaultValueByType("AnyPin")
         elif data["dataType"] == "AC_NDArrayPin":
             # ACHHX  to support  json deserialization of AC_NDArrayPin
-            ndshape, ndtype = json.loads(data["value"])
+            ndshape, ndtype = json.loads(data["value"], cls=pinClass.jsonDecoderClass())
             var.value = pinClass.internalDataStructure()(ndshape,dtype=ndtype)
+            var.value.dname = data["name"]
         else:
             var.value = json.loads(data["value"], cls=pinClass.jsonDecoderClass())
 

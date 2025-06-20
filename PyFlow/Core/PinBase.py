@@ -411,7 +411,7 @@ class PinBase(IPin):
         serializedData = None
         if not self.dataType == "AnyPin":
             if storable:
-                if type(self.currentData()) == findPinClassByType(self.dataType).internalDataStructure():
+                if type(self.currentData()) == findPinClassByType("AC_NDArrayPin").internalDataStructure(): #ACHHX check if current real data type is AC_NDArray class
                     # Special case for AC_NDArrayPin, which is not serializable by default
                     serializedData = json.dumps([self.currentData().shape, self.currentData().dtype.name],
                                             cls=self.jsonEncoderClass())

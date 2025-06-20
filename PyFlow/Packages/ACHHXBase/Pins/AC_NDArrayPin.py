@@ -1,14 +1,15 @@
 from PyFlow.Core import PinBase
 from PyFlow.Core.Common import *
-from numpy import ndarray as AC_ArrayND
-from numpy import bool_ as ndbool
+from numpy import ndarray #as AC_NDArray
+from PyFlow.Packages.ACHHXBase.FunctionLibraries.AC_GLOBALS import AC_NDArray  # ACHHX wapped ndarray to AC_NDArray
 
 
 class AC_NDArrayPin(PinBase):
     """doc string for AC_NDArrayPin"""
     def __init__(self, name, parent, direction, **kwargs):
         super(AC_NDArrayPin, self).__init__(name, parent, direction, **kwargs)
-        self.setDefaultValue(AC_ArrayND((0), dtype=ndbool))
+        tmpNDarray=AC_NDArray((0), dtype=bool,dname="AC_INIT_NDARRAY_NAME")
+        self.setDefaultValue(tmpNDarray)
         self._isAny= True #ACHHX Added for Watch function
 
     @staticmethod
@@ -25,7 +26,8 @@ class AC_NDArrayPin(PinBase):
 
     @staticmethod
     def pinDataTypeHint():
-        return 'AC_NDArrayPin', AC_ArrayND((0), dtype=ndbool)
+        tmpNDarray=AC_NDArray((0), dtype=bool,dname="AC_INIT_NDARRAY_NAME")  # ACHHX Added for Watch function
+        return 'AC_NDArrayPin', tmpNDarray
 
     @staticmethod
     def color():
@@ -33,10 +35,14 @@ class AC_NDArrayPin(PinBase):
 
     @staticmethod
     def internalDataStructure():
-        return AC_ArrayND
+        return AC_NDArray
 
     @staticmethod
     def processData(data):
-        newData = AC_NDArrayPin.internalDataStructure()(data.shape, dtype=data.dtype)
-        newData = data
-        return newData
+        if data is None:
+            tmpNDarray=AC_NDArrayPin.internalDataStructure()((0), dtype=bool, dname="AC_INIT_NDARRAY_NAME")  # ACHHX Added for Watch function
+            return tmpNDarray
+        #newData =  AC_NDArrayPin.internalDataStructure()(data.shape, dtype=data.dtype,dname=data.dname)  # ACHHX Added for Watch function
+        if data.dname is None:
+            data.dname = "AC_INIT_NDARRAY_NAME"
+        return data

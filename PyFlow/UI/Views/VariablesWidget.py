@@ -27,6 +27,7 @@ from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Canvas.UIVariable import UIVariable
 from PyFlow.UI.Views.VariablesWidget_ui import Ui_Form
 from PyFlow.Core.Common import *
+from PyFlow.Packages.ACHHXBase.FunctionLibraries.AC_GLOBALS import default_ACNDLIST #ACHHX Added for Variable List Record
 
 VARIABLE_TAG = "VAR"
 VARIABLE_DATA_TAG = "VAR_DATA"
@@ -83,6 +84,7 @@ class VariablesWidget(QWidget, Ui_Form):
         """Does not remove any variable. UI only
         """
         self.listWidget.clear()
+        default_ACNDLIST.clear() #ACHHX Added for Variable List Record
 
     def killVar(self, uiVariableWidget):
         variableGraph = uiVariableWidget._rawVariable.graph
@@ -97,6 +99,9 @@ class VariablesWidget(QWidget, Ui_Form):
         item = QListWidgetItem(self.listWidget)
         item.setSizeHint(QtCore.QSize(60, 20))
         self.listWidget.setItemWidget(item, uiVariable)
+        #if rawVariable.dataType == "AC_NDArrayPin":
+        #    uiVariable._rawVariable.value.dname = rawVariable.dname  # ACHHX Added for ndarray wrap
+        default_ACNDLIST.append(uiVariable) #ACHHX Added for Variable List Record
         return uiVariable
 
     def createVariable(
