@@ -207,8 +207,15 @@ class AnyPin(PinBase):
         if constrainedType != self.__class__.__name__:
             pinClass = findPinClassByType(constrainedType)
             # serialize with active type's encoder
-            dt["value"] = json.dumps(
-                self.currentData(), cls=pinClass.jsonEncoderClass()
+            if type(self.currentData()) == findPinClassByType("AC_NDArrayPin").internalDataStructure() and self.currentData() is not None:
+                #ACHHX special case for AC_NDArrayPin, we need to serialize it as a dict
+                #ACHHX TODO deserilize not handled. Will it be needed?
+                dt["value"] = json.dumps(
+                    [self.currentData().shape,self.currentData().dtype.name,], cls=pinClass.jsonEncoderClass()
+                )
+            else:
+                dt["value"] = json.dumps(
+                    self.currentData(), cls=pinClass.jsonEncoderClass()
             )
             dt["currDataType"] = constrainedType
         return dt
