@@ -238,7 +238,10 @@ class Variable(IItemBase):
         if self.dataType == "AnyPin":
             template["value"] = None
         elif self.dataType == "AC_NDArrayPin": #ACHHX  to support  json serialization of AC_NDArrayPin
-            template["value"] = json.dumps([self.value.shape,self.value.dtype.name], cls=pinClass.jsonEncoderClass())
+            if self.value is None:
+                template["value"] = None
+            else:
+                template["value"] = json.dumps([self.value.shape,self.value.dtype.name], cls=pinClass.jsonEncoderClass())
         else:
             template["value"] = json.dumps(self.value, cls=pinClass.jsonEncoderClass())
         if self.structure == StructureType.Dict:
