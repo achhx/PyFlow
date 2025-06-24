@@ -27,7 +27,12 @@ from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Canvas.UIVariable import UIVariable
 from PyFlow.UI.Views.VariablesWidget_ui import Ui_Form
 from PyFlow.Core.Common import *
-from PyFlow.Packages.ACHHXBase.FunctionLibraries.AC_GLOBALS import default_ACNDLIST #ACHHX Added for Variable List Record
+try:
+    from PyFlow.Packages.ACHHXBase.FunctionLibraries.AC_GLOBALS import AC_NDLIST  #
+    default_ACNDLIST = AC_NDLIST()  # ACHHX Added for Variable List Record
+    default_ACNDLIST.dname= "default_ACNDLIST"  # ACHHX Added for Watch function
+except ImportError:
+    default_ACNDLIST = []  # Fallback to empty list if import fails
 
 VARIABLE_TAG = "VAR"
 VARIABLE_DATA_TAG = "VAR_DATA"
@@ -67,10 +72,12 @@ class VariablesWidget(QWidget, Ui_Form):
         self.pbNewVar.clicked.connect(lambda : self.createVariable())
         self.listWidget = VariablesListWidget()
         self.lytListWidget.addWidget(self.listWidget)
+        default_ACNDLIST.clear()
         self.pyFlowInstance.newFileExecuted.connect(self.actualize)
 
     def actualize(self):
         self.clear()
+        default_ACNDLIST.clear()
         # populate current graph
         graph = self.pyFlowInstance.graphManager.get().activeGraph()
         if graph:
@@ -99,8 +106,6 @@ class VariablesWidget(QWidget, Ui_Form):
         item = QListWidgetItem(self.listWidget)
         item.setSizeHint(QtCore.QSize(60, 20))
         self.listWidget.setItemWidget(item, uiVariable)
-        #if rawVariable.dataType == "AC_NDArrayPin":
-        #    uiVariable._rawVariable.value.dname = rawVariable.dname  # ACHHX Added for ndarray wrap
         default_ACNDLIST.append(uiVariable) #ACHHX Added for Variable List Record
         return uiVariable
 

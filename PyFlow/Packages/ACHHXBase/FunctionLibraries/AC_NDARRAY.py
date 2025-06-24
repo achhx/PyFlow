@@ -5,7 +5,7 @@ import ctypes
 import ast
 from typing import List
 from typing import TypedDict
-from PyFlow.Packages.ACHHXBase.FunctionLibraries.AC_GLOBALS import default_ACNDLIST #ACHHX Added for Variable List Record
+from PyFlow.UI.Views.VariablesWidget import default_ACNDLIST  #ACHHX Added for Variable List Record
 from PyFlow.Packages.ACHHXBase.FunctionLibraries.AC_GLOBALS import AC_NDArray  # ACHHX wapped ndarray to AC_NDArray
 
 #定义AC_NDARRAY类，继承自FunctionLibraryBase

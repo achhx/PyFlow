@@ -43,7 +43,6 @@ def ACGetStringByType(gettype=(ctypes,ctypes.c_int)):
     else:
         raise ValueError("Unsupported data type")
 
-default_ACNDLIST = []
 
 class AC_NDArray(ndarray):
     """doc string for AC_NDArray"""
@@ -57,3 +56,38 @@ class AC_NDArray(ndarray):
     def __array_finalize__(self, obj):
         if obj is None: return
         self.dname = getattr(obj, 'dname', "AC_INIT_NDARRAY_NAME")
+
+class AC_NDLIST(list):
+    """doc string for AC_NDLIST"""
+    def __init__(self, *args, **kwargs):
+        super(AC_NDLIST, self).__init__(*args, **kwargs)
+        self.dname = "AC_INIT_NDLIST_NAME"  # ACHHX Added for Watch function
+
+  #  def __array_finalize__(self, obj):
+  #      if obj is None: return
+  #      self.dname = getattr(obj, 'dname', "AC_INIT_NDLIST_NAME")
+
+    def findVarsByName(self,name:str):
+        """Find variables by its name in the default_ACNDLIST."""
+        findVars=[]
+        for array in self:
+            if array._rawVariable.name == name:
+                findVars.append(array)
+        return findVars
+
+    # ACHHX Added for Variable List Record, reload the append method to check for duplicates
+    # and prevent adding the same variable multiple times.
+    def append(self,new_array:AC_NDArray=None):
+        """Append a new AC_NDArray to the append."""
+        if new_array is None:
+            print("Warning: Attempted to append None to default_ACNDLIST.")
+            return False
+        existVars = self.findVarsByName(new_array._rawVariable.name)
+        if len(existVars) == 0: #ACHHX default_ACNDLIST中没有该变量，则添加到default_ACNDLIST；
+            super().append(new_array)
+            return True
+        else :                  #ACHHX 如果default_ACNDLIST中已有该变量
+            print(f"Warning: {new_array._rawVariable.name} already exists in default_ACNDLIST.")
+            if len(existVars) > 1:
+                raise print(f"Warning: Multiple {new_array._rawVariable.name} exists in default_ACNDLIST.")
+        return False
