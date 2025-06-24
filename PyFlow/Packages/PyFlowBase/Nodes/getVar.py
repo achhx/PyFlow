@@ -129,4 +129,7 @@ class getVar(NodeBase):
         return "Access variable value"
 
     def compute(self, *args, **kwargs):
-        self.out.setData(copy(self.var.value))
+        if self.var.dataType == "AC_NDArrayPin":
+            self.out.setData(self.var.value)
+        else:
+            self.out.setData(copy(self.var.value))
