@@ -8,7 +8,7 @@ class AC_NDArrayPin(PinBase):
     """doc string for AC_NDArrayPin"""
     def __init__(self, name, parent, direction, **kwargs):
         super(AC_NDArrayPin, self).__init__(name, parent, direction, **kwargs)
-        tmpNDarray=AC_NDArray((0), dtype=bool,dname="AC_INIT_NDARRAY_NAME")
+        tmpNDarray=AC_NDArray((0), dtype=None,dname="AC_INIT_NDARRAY_NAME")
         self.setDefaultValue(tmpNDarray)
         self._isAny= True #ACHHX Added for Watch function
 
@@ -26,7 +26,7 @@ class AC_NDArrayPin(PinBase):
 
     @staticmethod
     def pinDataTypeHint():
-        tmpNDarray=AC_NDArray((0), dtype=bool,dname="AC_INIT_NDARRAY_NAME")  # ACHHX Added for Watch function
+        tmpNDarray=AC_NDArray((0), dtype=None,dname="AC_INIT_NDARRAY_NAME")  # ACHHX Added for Watch function
         return 'AC_NDArrayPin', tmpNDarray
 
     @staticmethod
@@ -40,7 +40,7 @@ class AC_NDArrayPin(PinBase):
     @staticmethod
     def processData(data):
         if data is None:
-            tmpNDarray=AC_NDArrayPin.internalDataStructure()((0), dtype=bool, dname="AC_INIT_NDARRAY_NAME")  # ACHHX Added for Watch function
+            tmpNDarray=AC_NDArrayPin.internalDataStructure()((0), dtype=None, dname="AC_INIT_NDARRAY_NAME")  # ACHHX Added for Watch function
             return tmpNDarray
         #newData =  AC_NDArrayPin.internalDataStructure()(data.shape, dtype=data.dtype,dname=data.dname)  # ACHHX Added for Watch function
         if data.dname is None:

@@ -19,8 +19,8 @@ class AC_NDARRAY(FunctionLibraryBase):
     @staticmethod
     @IMPLEMENT_NODE(returns=None,nodeType=NodeTypes.Callable, meta={NodeMeta.CATEGORY: 'AC_NDARRAY', NodeMeta.KEYWORDS: []})
     def AC_newArray(
-        inNDArray=('AC_NDArrayPin',AC_NDArray((0), dtype=bool,dname="AC_INIT_NDARRAY_NAME")),  # ACHHX Added for Watch function
-        outNDArray=(REF,('AC_NDArrayPin',AC_NDArray((0), dtype=bool,dname="AC_INIT_NDARRAY_NAME"))),
+        inNDArray=('AC_NDArrayPin',AC_NDArray((0), dtype=None,dname="AC_INIT_NDARRAY_NAME")),  # ACHHX Added for Watch function
+        outNDArray=(REF,('AC_NDArrayPin',AC_NDArray((0), dtype=None,dname="AC_INIT_NDARRAY_NAME"))),
         dataType=('StringPin',None),
         dataShape=('StringPin',None),
         result=(REF,('BoolPin',None))):
@@ -46,8 +46,8 @@ class AC_NDARRAY(FunctionLibraryBase):
     @staticmethod
     @IMPLEMENT_NODE(returns=None,nodeType=NodeTypes.Callable, meta={NodeMeta.CATEGORY: 'AC_NDARRAY', NodeMeta.KEYWORDS: []})
     def AC_freeArray(
-        inNDArray=('AC_NDArrayPin',AC_NDArray((0), dtype=bool,dname="AC_INIT_NDARRAY_NAME")),  # ACHHX Added for Watch function
-        outNDArray=(REF,('AC_NDArrayPin',AC_NDArray((0), dtype=bool,dname="AC_INIT_NDARRAY_NAME"))),  #, dname="AC_INIT_NDARRAY_NAME"
+        inNDArray=('AC_NDArrayPin',AC_NDArray((0), dtype=None,dname="AC_INIT_NDARRAY_NAME")),  # ACHHX Added for Watch function
+        outNDArray=(REF,('AC_NDArrayPin',AC_NDArray((0), dtype=None,dname="AC_INIT_NDARRAY_NAME"))),  #, dname="AC_INIT_NDARRAY_NAME"
         result    =(REF,('BoolPin',None))):
         """free a specific ndarray by name!"""
         for varItem in default_ACNDLIST:

@@ -48,7 +48,7 @@ class AC_NDArray(ndarray):
     """doc string for AC_NDArray"""
     dname = "AC_INIT_NDARRAY_NAME"  # ACHHX Added for Watch function
 
-    def __new__(cls, shape, dtype=bool, dname="AC_INIT_NDARRAY_NAME"):
+    def __new__(cls, shape, dtype=None, dname="AC_INIT_NDARRAY_NAME"):
         obj = super(AC_NDArray, cls).__new__(cls, shape, dtype=dtype)
         obj.dname = dname
         return obj
