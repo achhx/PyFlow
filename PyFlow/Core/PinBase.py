@@ -1117,3 +1117,8 @@ class PinBase(IPin):
         """Returns json decoder class for this pin
         """
         return json.JSONDecoder
+
+    #ACHHX added this method to avoid errors in ACHHXBase
+    #ACHHX --AttributeError: 'AC_NDArrayPin' object has no attribute 'updateError'
+    def updateError(self, *args, **kwargs):
+        pass
