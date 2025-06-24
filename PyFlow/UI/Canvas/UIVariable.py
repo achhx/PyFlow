@@ -177,7 +177,10 @@ class UIVariable(QWidget, IPropertiesViewSupport):
         baseCategory = CollapsibleFormWidget(headName="Base")
         # name
         le_name = QLineEdit(self._rawVariable.name)
-        le_name.returnPressed.connect(lambda: self.setName(le_name.text()))
+        #ACHHX added to prevent name conflicts, we use a unique name for the variable
+        # and update the name in the graph manager to ensure uniqueness
+        le_name.returnPressed.connect(lambda: self.setName(le_name.text()) if le_name.text()==self._rawVariable.name 
+                        else le_name.setText( self.setName(self._rawVariable.graph.graphManager.getUniqVariableName(name=le_name.text()))))
         baseCategory.addWidget("Name", le_name)
 
         # data type
@@ -417,3 +420,5 @@ class UIVariable(QWidget, IPropertiesViewSupport):
     def setName(self, name):
         self._rawVariable.name = name
         self.labelName.setText(self._rawVariable.name)
+        return name #ACHHX added to prevent name conflicts, we use a unique name for the variable
+        # and update the name in the graph manager to ensure uniqueness
