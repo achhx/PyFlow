@@ -31,6 +31,8 @@ from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.Core.NodeBase import NodeBase
 
 from PyFlow.UI.Utils.stylesheet import editableStyleSheet
+from PyFlow  import GET_PACKAGES, GET_PACKAGE_CHECKED
+from inspect import getfile, getsourcefile, getsourcelines
 
 
 class NodeBoxLineEdit(QLineEdit):
@@ -354,6 +356,151 @@ class NodeBoxTreeWidget(QTreeWidget):
 
     def mousePressEvent(self, event):
         super(NodeBoxTreeWidget, self).mousePressEvent(event)
+        if event.button() == QtCore.Qt.RightButton:
+                # 弹出对话框，显示“新建节点”
+                item_clicked = self.currentItem()
+                menu = QMenu(self)
+                action_new_node = menu.addAction("New Node")
+                action_new_category = menu.addAction("New Category")
+                action_new_file = menu.addAction("New Library")
+                # 获取全局鼠标位置并显示菜单
+                cursor_pos = QtGui.QCursor.pos()
+                action = menu.exec_(cursor_pos)
+                if action == action_new_node:
+                    packages = list(GET_PACKAGES().keys())
+                    if not packages:
+                        QMessageBox.information(self, "Warning", "No Available Package Found……")
+                    else:
+                        dlg = NewNodeDialog(packages, self)
+                        if dlg.exec_() == QDialog.Accepted:
+                            pkg, lib, cat, node_name = dlg.getResult()
+                            if pkg and lib and cat and node_name:
+                                # 1. 找到对应的Library文件路径
+                                package_path = GET_PACKAGE_PATH(pkg)
+                                lib_file = os.path.join(package_path, "FunctionLibraries", f"{lib}.py")
+                                if not os.path.exists(lib_file):
+                                    QMessageBox.information(self, "Error", f"Library file not found: {lib_file}")
+                                else:
+                                    # 2. 构造Node模板内容
+                                    node_template = f"""
+    @staticmethod
+    @IMPLEMENT_NODE(returns=None, nodeType=NodeTypes.Callable, meta={{NodeMeta.CATEGORY: '{cat}', NodeMeta.KEYWORDS: []}})
+    def {node_name}(
+        inData=('AnyPin', None, {{}}),
+        outData=(REF, ('AnyPin', None))
+        ):
+        \"\"\"Auto-generated node: {node_name}\"\"\"
+        try:
+            # TODO: implement node logic
+            outData(inData)
+            return True
+        except Exception as e:
+            print(f"Error in {node_name}: {{e}}")
+            return False
+"""
+                                    my_line = 1 #ACHHX  记录所在文件行数
+                                    content=""
+                                    # 3. 检查是否已存在同名节点
+                                    with open(lib_file, "r", encoding="utf-8") as f:
+                                        lines = f.readlines()
+                                        my_line = len(lines)     #ACHHX 获取文件总行数
+                                        content = "".join(lines) #ACHHX original method f.read()
+                                    if f"def {node_name}(" in content:
+                                        QMessageBox.information(self, "Warning", f"Node \"{node_name}\" already exists in {lib}.py")
+                                        #ACHHX 已经存在，那么文件行数就通过查找获得
+                                        for idx, line in enumerate(lines, 1):
+                                            if f"def {node_name}(" in line:
+                                                my_line = idx
+                                                break
+                                    else:
+                                        #ACHHX 新增节点，那么文件行数就在文件末尾
+                                        my_line +=5 #ACHHX 加两行空行和两行语义描述和一行到函数名称
+                                        # 4. 追加到文件末尾
+                                        with open(lib_file, "a", encoding="utf-8") as f:
+                                            f.write("\n" + node_template)
+                                        self.parent().parent().parent().parent().parent()._clickReloadPackages() #ACHHX reload Packages to refresh new added items
+                                        QMessageBox.information(self, "New Node", f"Node \"{node_name}\" is created in \"{pkg}/{lib}/{cat}\".\n")
+                                    # 5. 用VSCode打开文件并定位到新节点
+                                    try:
+                                        # Windows下用code命令打开文件
+                                        os.system("code \""+lib_file+"\":" + str(my_line)+" -r -g")
+                                    except Exception as e:
+                                        QMessageBox.information(self, "Error", f"Node created, but failed to open VSCode: {e}")
+                            else:
+                                QMessageBox.information(self, "Warning, Failed to Create New Node", f"Node \"{node_name}\" in \"{pkg}/{lib}/{cat}\".\n")
+                elif action == action_new_category:
+                    # 新建分类：选择Package、Library、输入Category名
+                    #ACHHX TODO ???如何新建category？？？
+                    packages = list(GET_PACKAGES().keys())
+                    if not packages:
+                        QMessageBox.information(self, "Warning", "No Available Package Found……")
+                    else:
+                        dlg = CategoryDialog(packages, self)
+                        if dlg.exec_() == QDialog.Accepted:
+                            pkg, lib, cat_name = dlg.getResult()
+                            if pkg and lib and cat_name:
+                                QMessageBox.information(self, "New Category", f"Category \"{cat_name}\" is created in \"{pkg}/{lib}\".\n")
+                elif action == action_new_file:
+                     # 通过下拉框选择已有可用的Packages
+                    packages = list(GET_PACKAGES().keys())
+                    if not packages:
+                        QMessageBox.information(self, "Warning", "No Available Package Found……")
+                    else:
+                        dlg = PackageFileDialog(packages, self)
+                        if dlg.exec_() == QDialog.Accepted:
+                            pkg, file_name = dlg.getResult()
+                            if pkg and file_name:
+                                # 1. 构造目标文件路径
+                                package_path = GET_PACKAGE_PATH(pkg)
+                                lib_dir = os.path.join(package_path, "FunctionLibraries")
+                                if not os.path.exists(lib_dir):
+                                    os.makedirs(lib_dir)
+                                lib_file = os.path.join(lib_dir, f"{file_name}.py")
+                                # 2. 检查文件是否已存在
+                                if os.path.exists(lib_file):
+                                    QMessageBox.information(self, "Warning", f"Library \"{file_name}.py\" already exists in Package \"{pkg}\".")
+                                else:
+                                    # 3.1 创建新文件模板
+                                    file_template = f"""
+# {file_name}.py created by ACHHX
+from PyFlow.Core.Common import *
+from PyFlow.Core import IMPLEMENT_NODE
+from PyFlow.Core import FunctionLibraryBase
+
+class {file_name}(FunctionLibraryBase):
+    '''Auto generated {file_name} class & category by ACHHX'''
+    def __init__(self,packageName):
+        super({file_name},self).__init__(packageName)
+        
+        
+    @staticmethod
+    @IMPLEMENT_NODE(returns=None, nodeType=NodeTypes.Callable, meta={{NodeMeta.CATEGORY: '{file_name}', NodeMeta.KEYWORDS: []}})
+    def AC_NULLNODE(
+        inData=('AnyPin', None, {{}}),
+        outData=(REF, ('AnyPin', None))
+        ):
+        \"\"\"Auto-generated node: AC_NULLNODE\"\"\"
+        # TODO: implement node logic
+        outData(inData)
+        return True
+"""
+                                    # 3. 创建新文件并写入基础模板
+                                    with open(lib_file, "w", encoding="utf-8") as f:
+                                        f.write("\n"+file_template)
+                                    self.parent().parent().parent().parent().parent()._clickReloadPackages() #ACHHX reload Packages to refresh new added items
+                                    QMessageBox.information(self, "New Library", f"Library \"{file_name}\" is created in Package \"{pkg}\".\n ")
+                                    # 4. 用VSCode打开新建的文件
+                                    try:
+                                        os.system(f'code "{lib_file}" -r -g')
+                                    except Exception as e:
+                                        QMessageBox.information(self, "Error", f"Library created, but failed to open VSCode: {e}")
+
+
+                            else:
+                                QMessageBox.information(self, "Warning: Failed to Create New Library", f"Library \"{file_name}\" in Package \"{pkg}\".\n ")
+                item_clicked = None
+                return
+        
         item_clicked = self.currentItem()
         if not item_clicked:
             event.ignore()
@@ -432,6 +579,171 @@ class NodeBoxTreeWidget(QTreeWidget):
                 )
         #super(NodeBoxTreeWidget, self).update()
 
+#ACHHX 创建新的节点
+class NewNodeDialog(QDialog):
+    """自定义对话框：选择Package、Library、Category，输入Node名称"""
+    def __init__(self, packages, parent=None):
+        super(NewNodeDialog, self).__init__(parent)
+        self.setWindowTitle("New Node")
+        self.setModal(True)
+
+        layout = QVBoxLayout(self)
+
+        # 下拉框：选择Package
+        self.combo_pkg = QComboBox(self)
+        self.combo_pkg.addItems(packages)
+        layout.addWidget(QLabel("In Package：", self))
+        layout.addWidget(self.combo_pkg)
+
+        # 下拉框：选择Library
+        self.combo_lib = QComboBox(self)
+        layout.addWidget(QLabel("In Library：", self))
+        layout.addWidget(self.combo_lib)
+
+        # 下拉框：选择Category
+        self.combo_cat = QComboBox(self)
+        layout.addWidget(QLabel("In Category：", self))
+        layout.addWidget(self.combo_cat)
+
+        # 文本框：输入Node名
+        self.lineEdit = QLineEdit(self)
+        layout.addWidget(QLabel("New Node Name：", self))
+        layout.addWidget(self.lineEdit)
+
+        # 按钮
+        btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
+        btns.accepted.connect(self.accept)
+        btns.rejected.connect(self.reject)
+        layout.addWidget(btns)
+
+        # 初始化Library和Category下拉框
+        self.updateLibraries(self.combo_pkg.currentText())
+        self.combo_pkg.currentIndexChanged.connect(self.onPackageChanged)
+        self.combo_lib.currentIndexChanged.connect(self.onLibraryChanged)
+
+    def onPackageChanged(self, idx):
+        pkg = self.combo_pkg.currentText()
+        self.updateLibraries(pkg)
+
+    def onLibraryChanged(self, idx):
+        pkg = self.combo_pkg.currentText()
+        lib = self.combo_lib.currentText()
+        self.updateCategories(pkg, lib)
+
+    def updateLibraries(self, pkg):
+        self.combo_lib.clear()
+        packages = GET_PACKAGES()
+        libs = []
+        if pkg in packages:
+            libs = list(packages[pkg].GetFunctionLibraries().keys())
+        self.combo_lib.addItems(libs)
+        # 更新category
+        if libs:
+            self.updateCategories(pkg, libs[0])
+        else:
+            self.combo_cat.clear()
+
+    def updateCategories(self, pkg, lib):
+        self.combo_cat.clear()
+        categories = set()
+        packages = GET_PACKAGES()
+        if pkg in packages and lib in packages[pkg].GetFunctionLibraries():
+            foos = packages[pkg].GetFunctionLibraries()[lib].getFunctions()
+            for foo in foos.values():
+                cat = foo.__annotations__["meta"][NodeMeta.CATEGORY]
+                categories.add(cat)
+        self.combo_cat.addItems(sorted(categories))
+
+    def getResult(self):
+        return (self.combo_pkg.currentText(),
+                self.combo_lib.currentText(),
+                self.combo_cat.currentText(),
+                self.lineEdit.text())
+#ACHHX 创建新的分类
+class CategoryDialog(QDialog):
+    """自定义对话框：下拉选择Package、下拉选择Library、输入Category名"""
+    def __init__(self, packages, parent=None):
+        super(CategoryDialog, self).__init__(parent)
+        self.setWindowTitle("New Category")
+        self.setModal(True)
+        self.selected_package = None
+        self.selected_library = None
+        self.category_name = None
+
+        layout = QVBoxLayout(self)
+
+        # 下拉框：选择Package
+        self.combo_pkg = QComboBox(self)
+        self.combo_pkg.addItems(packages)
+        layout.addWidget(QLabel("In Package：", self))
+        layout.addWidget(self.combo_pkg)
+
+        # 下拉框：选择Library
+        self.combo_lib = QComboBox(self)
+        layout.addWidget(QLabel("In Library：", self))
+        layout.addWidget(self.combo_lib)
+
+        # 文本框：输入Category名
+        self.lineEdit = QLineEdit(self)
+        layout.addWidget(QLabel("New Category Name：", self))
+        layout.addWidget(self.lineEdit)
+
+        # 按钮
+        btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
+        btns.accepted.connect(self.accept)
+        btns.rejected.connect(self.reject)
+        layout.addWidget(btns)
+
+        # 初始化Library下拉框
+        self.updateLibraries(self.combo_pkg.currentText())
+        self.combo_pkg.currentIndexChanged.connect(self.onPackageChanged)
+
+    def onPackageChanged(self, idx):
+        pkg = self.combo_pkg.currentText()
+        self.updateLibraries(pkg)
+
+    def updateLibraries(self, pkg):
+        self.combo_lib.clear()
+        # 获取该package下所有library
+        libs = []
+        packages = GET_PACKAGES()
+        if pkg in packages:
+            libs = list(packages[pkg].GetFunctionLibraries().keys())
+        self.combo_lib.addItems(libs)
+
+    def getResult(self):
+        return self.combo_pkg.currentText(), self.combo_lib.currentText(), self.lineEdit.text()
+#ACHHX 创建新的库文件
+class PackageFileDialog(QDialog):
+    """自定义对话框：下拉选择Package+输入文件名"""
+    def __init__(self, packages, parent=None):
+        super(PackageFileDialog, self).__init__(parent)
+        self.setWindowTitle("New Library")
+        self.setModal(True)
+        self.selected_package = None
+        self.file_name = None
+
+        layout = QVBoxLayout(self)
+
+        # 下拉框
+        self.combo = QComboBox(self)
+        self.combo.addItems(packages)
+        layout.addWidget(QLabel("In Package：", self))
+        layout.addWidget(self.combo)
+
+        # 文本框
+        self.lineEdit = QLineEdit(self)
+        layout.addWidget(QLabel("New Library Name：", self))
+        layout.addWidget(self.lineEdit)
+
+        # 按钮
+        btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
+        btns.accepted.connect(self.accept)
+        btns.rejected.connect(self.reject)
+        layout.addWidget(btns)
+
+    def getResult(self):
+        return self.combo.currentText(), self.lineEdit.text()
 
 class NodeBoxSizeGrip(QSizeGrip):
     """docstring for NodeBoxSizeGrip."""
