@@ -43,6 +43,34 @@ def ACGetStringByType(gettype=(ctypes,ctypes.c_int)):
     else:
         raise ValueError("Unsupported data type")
 
+#ACHHX 检查变量是否就绪（已分配空间）
+def isVariableReady(checkArray):
+    """Check if the provided array is a valid, non-empty ndarray."""
+    #ACHHX 检查变量是否为None，为None则报错
+    if checkArray is None:
+        raise MemoryError(f"Error: Array {checkArray} is None.")
+    #ACHHX 检查变量是否是AC_NDArray,不是则直接完成检查返回True
+    if not isinstance(checkArray, AC_NDArray):
+        return True
+    #ACHHX 检查变量是否为分配空间，为空则报错
+    if checkArray.size == 0:
+        raise ValueError(f"Error: Array {checkArray} is empty.")
+    return True
+
+#ACHHX 检查变量
+def isVariableOperatable(leftVar=None, rightVarList=None):
+    """Check if the shapes of two variables match."""
+    #ACHHX 检查变量就绪度
+    isVariableReady(leftVar)
+    for rightVar in rightVarList:
+        isVariableReady(rightVar)
+    
+    #ACHHX 检查变量的形状是否匹配
+    for rightVar in rightVarList:
+        if isinstance(rightVar,AC_NDArray) and leftVar.shape != rightVar.shape:
+            raise ValueError(f"Shape of {leftVar.dname} and {rightVar.dname} mismatch")
+    return True
+
 
 class AC_NDArray(ndarray):
     """doc string for AC_NDArray"""
