@@ -6,7 +6,7 @@ import ast
 from typing import List
 from typing import TypedDict
 from PyFlow.UI.Views.VariablesWidget import default_ACNDLIST  #ACHHX Added for Variable List Record
-from PyFlow.Packages.ACHHXBase.FunctionLibraries.AC_GLOBALS import AC_NDArray  # ACHHX wapped ndarray to AC_NDArray
+from PyFlow.Packages.ACHHXBase.FunctionLibraries.AC_GLOBALS import AC_NDArray, isVariableReady  # ACHHX wapped ndarray to AC_NDArray
 
 #定义AC_NDARRAY类，继承自FunctionLibraryBase
 class AC_NDARRAY(FunctionLibraryBase):
@@ -62,3 +62,22 @@ class AC_NDARRAY(FunctionLibraryBase):
         outNDArray(inNDArray)
         result(False)
         return False
+
+    @staticmethod
+    @IMPLEMENT_NODE(returns=None, nodeType=NodeTypes.Callable, meta={NodeMeta.CATEGORY: 'AC_NDARRAY', NodeMeta.KEYWORDS: []})
+    def AC_setValue(
+        inNDArray=('AC_NDArrayPin',AC_NDArray((0), dtype=None,dname="AC_INIT_NDARRAY_NAME")),  # ACHHX Added for Watch function
+        inRight =("AnyPin",None,{PinSpecifiers.SUPPORTED_DATA_TYPES: ["FloatPin", "IntPin"],},),
+        result    =(REF,('BoolPin',None))
+        ):
+        """Auto-generated node: AC_setValue"""
+        isVariableReady(inNDArray)
+        try:
+            # TODO: implement node logic
+            inNDArray.setfield(dtype=inNDArray.dtype.name,value=inRight)
+            result(True)
+            return True
+        except Exception as e:
+            print(f"Error in AC_setValue: {e}")
+            result(False)
+            return False

@@ -465,7 +465,7 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
         else:
             MYLibrary = MYpackage.GetNodeClasses()
             MYfunc    = MYLibrary.get(self._rawNode.__class__.__name__).__init__
-        MYsource = getsourcefile(MYfunc)
+        MYsource = getsourcefile(MYfunc) #ACHHX TODO MYfunc.__code__.co_filename
         MYline   = getsourcelines(MYfunc)
         MYarg    = " \""+str(MYsource)+"\" -n"+str(MYline[1])
         global MYexe
